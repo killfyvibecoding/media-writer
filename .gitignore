@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.python-version
+.venv/
+venv/
+env/
+
+# Local runtime outputs
+outputs/
+dist/
+build/
+*.log
+*.tmp
+*.bak
+
+# Generated media
+*.mp3
+*.m4a
+*.wav
+*.aac
+*.mp4
+*.mov
+
+# Secrets and local config
+.env
+.env.*
+md2wechat.yaml
+.md2wechat.yaml
+config.yaml
+tokens.json
+cookies.json
+*.secret
+*.key
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Codex local helper deps
+.codex_pydeps/

@@ -1,0 +1,6 @@
+﻿interface:
+  display_name: "Media Writer"
+  short_description: "Generate NotebookLM podcast packages and/or WeChat drafts."
+  default_prompt: "Use $media-writer to handle this source: generate a podcast package, create a rewritten WeChat draft, or do both if requested."
+policy:
+  allow_implicit_invocation: true
