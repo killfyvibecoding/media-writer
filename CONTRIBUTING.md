@@ -7,6 +7,7 @@
 - 新输入格式的处理说明或脚本。
 - NotebookLM CLI 参数兼容经验。
 - md2wechat 错误码、配置问题和修复方案。
+- 内容诊断、PPT/思维导图、小红书和视频分支的真实案例。
 - 更稳的 Markdown 转微信 HTML 流程。
 - 更好的封面生成模板。
 - 文档、示例和 FAQ 改进。
@@ -30,6 +31,11 @@ python -m pip install -r requirements.txt
 
 ```bash
 python -m py_compile scripts/*.py
+python tests/test_make_content_diagnosis.py -v
+python tests/test_make_xiaohongshu_post.py -v
+python tests/test_run_notebooklm_podcast.py -v
+python tests/test_run_notebooklm_artifact.py -v
+python tests/test_run_ppt_podcast_video.py -v
 ```
 
 5. 提交 PR，并说明：
@@ -60,4 +66,5 @@ python -m py_compile scripts/*.py
 Add NotebookLM retry notes
 Fix WeChat draft JSON metadata
 Document supported source formats
+Update diagnosis-driven podcast flow
 ```

@@ -28,9 +28,20 @@ assignees: ""
 
 - OS:
 - Python version:
-- NotebookLM CLI version:
+- NotebookLM CLI / notebooklm-py version:
+- HyperFrames version, if video branch is involved:
 - md2wechat version:
 - Media Writer commit:
+
+## 受影响分支
+
+- [ ] 内容诊断 `*_content_diagnosis.md/json`
+- [ ] NotebookLM 播客 / 音频
+- [ ] NotebookLM PPT / 思维导图 / artifact
+- [ ] PPT+播客 HyperFrames 视频
+- [ ] 微信公众号草稿
+- [ ] 小红书科普帖
+- [ ] 其他：
 
 ## 相关输入类型
 
@@ -40,7 +51,16 @@ assignees: ""
 - [ ] X / Twitter
 - [ ] YouTube
 - [ ] 播客转录稿
+- [ ] PDF / DOCX / PPTX
 - [ ] 其他：
+
+## 输出与日志
+
+- 输出目录：
+- 诊断文件路径：
+- NotebookLM state/log 路径：
+- 微信 `media_id`，如已返回：
+- 失败命令摘要：
 
 ## 补充信息
 

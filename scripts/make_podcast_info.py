@@ -28,11 +28,7 @@ def main() -> int:
 
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(
-        f"标题：\n{title}\n\n简介：\n{description}\n",
-        encoding="utf-8",
-        newline="\n",
-    )
+    output.write_text(f"标题：\n{title}\n\n简介：\n{description}\n", encoding="utf-8")
     print(output)
     return 0
 

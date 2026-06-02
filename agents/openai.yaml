@@ -1,6 +1,6 @@
-﻿interface:
+interface:
   display_name: "Media Writer"
-  short_description: "Generate NotebookLM podcast packages and/or WeChat drafts."
-  default_prompt: "Use $media-writer to handle this source: generate a podcast package, create a rewritten WeChat draft, or do both if requested."
+  short_description: "Diagnose content value, then generate NotebookLM outputs, PPT+podcast MP4 videos, WeChat drafts, and Xiaohongshu explainer posts."
+  default_prompt: "Use $media-writer to diagnose this source first, then generate NotebookLM outputs, create a premium PPT deck, combine PPT and podcast into a HyperFrames MP4, create a rewritten WeChat draft, generate a Xiaohongshu 科普帖, or combine requested outputs."
 policy:
   allow_implicit_invocation: true

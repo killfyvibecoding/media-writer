@@ -46,6 +46,19 @@ cd "C:\Users\Administrator\Documents\Codex\2026-04-22-md2wechat-1-curl-fssl-http
 .\tools\md2wechat\md2wechat.exe config validate
 ```
 
+Treat live help as the authority:
+
+```bash
+md2wechat --help
+```
+
+There are two command surfaces in the wild:
+
+1. Subcommand mode: supports `version`, `capabilities`, `upload_image`, and `create_draft`.
+2. Direct-publish mode: supports flags such as `--markdown`, `--html`, `--cover`, `--title`, and `--summary`, and creates the draft in one command.
+
+If `version --json` fails as an unknown argument and `--help` shows direct publish flags, use direct-publish mode. Python package installs of direct-publish mode read WeChat credentials from `.env` or `WECHAT_APPID` / `WECHAT_APP_SECRET`; they may ignore `md2wechat.yaml`.
+
 ## Convert Markdown To Local HTML
 
 ```powershell
@@ -109,6 +122,22 @@ Save `data.media_id`.
 ```
 
 Success returns a draft `media_id`.
+
+## Direct-Publish Fallback
+
+When the installed CLI exposes direct flags instead of `upload_image` and `create_draft`, convert local HTML first, create a local cover JPG, then call:
+
+```bash
+md2wechat \
+  --html "{article.wechat.html}" \
+  --title "{title}" \
+  --summary "{digest}" \
+  --author "{author}" \
+  --cover "{cover.jpg}" \
+  --style tech
+```
+
+The direct-publish CLI uploads the cover and returns the draft `media_id` in its JSON result. If it returns `40125 invalid appsecret`, compare the live `.env` or environment variables with the intended Official Account credentials before retrying.
 
 ## Notes
 
