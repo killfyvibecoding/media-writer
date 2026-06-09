@@ -4,7 +4,7 @@ Use this flow before generating podcast, WeChat, Xiaohongshu, PPT, mind map, or 
 
 ## Goal
 
-Diagnose the source as a media asset before rewriting or packaging it. The diagnosis decides what is worth keeping, what should be weakened, which platform angle is strongest, and how the podcast should sound.
+Diagnose the source as a media asset before rewriting or packaging it. The diagnosis decides what is worth keeping, what should be weakened, which platform angle is strongest, how the podcast should sound, and whether the topic has enough visual logic to support covers, first images, PPT visuals, or image cards.
 
 This layer borrows the practical logic of dbskill-style content diagnosis:
 
@@ -12,6 +12,7 @@ This layer borrows the practical logic of dbskill-style content diagnosis:
 - Fix the topic, hook, expression efficiency, and cognitive gap before writing.
 - Detect fuzzy concepts, false assumptions, AI-smooth writing, and weak platform fit.
 - Convert raw information into platform-native strategy instead of summarizing the source.
+- Decide whether visuals can attract viewers logically, not just decorate the output.
 
 ## Required Outputs
 
@@ -36,6 +37,7 @@ Use `scripts/make_content_diagnosis.py` to package the files after making the di
 5. **Concept traps**: find undefined terms, false choices, category confusion, and unsupported causal claims.
 6. **Material strength**: list usable data, cases, quotes, scenes, authority signals, and concrete examples.
 7. **Keep / drop / risk**: decide what must remain, what should be weakened, and what requires caution.
+8. **Visual / viral logic**: decide whether the content has a concrete image hook, curiosity gap, useful metaphor, and platform-native promise.
 
 ## Packaging Command Shape
 
@@ -66,6 +68,15 @@ python "{skill_dir}/scripts/make_content_diagnosis.py" \
   --podcast-description "{description}" \
   --podcast-cover-direction "{cover direction}" \
   --podcast-point "{must cover point}" \
+  --visual-fit-score 8 \
+  --visual-explosive-potential "{why this can attract viewers or become shareable}" \
+  --visual-logic "{why the visual promise follows from the content logic}" \
+  --visual-hook "{first-view audience hook}" \
+  --visual-style-keyword "{style keyword}" \
+  --visual-metaphor "{visual metaphor}" \
+  --visual-avoid "{thing to avoid}" \
+  --visual-asset "wechat-cover::高::{cover direction}" \
+  --visual-asset "podcast-cover::中高::{cover direction}" \
   --markdown "{output_dir}/{stem}_content_diagnosis.md" \
   --json "{output_dir}/{stem}_content_diagnosis.json"
 ```
@@ -88,6 +99,19 @@ The instructions should specify:
 - risk notes if the source touches finance, medical, legal, policy, or market claims
 
 Use the diagnosis title, description, and cover direction for the podcast info TXT and cover generation.
+
+### Visual assets
+
+Use `visual_strategy` to decide if and how to create images:
+
+- `fit_score`: whether the content should become image-led.
+- `explosive_potential`: why the visual can attract attention or be saved/shared.
+- `logic_check`: why the cover promise is not clickbait and follows from the source.
+- `audience_hook`: what the viewer should understand in the first second.
+- `style_keywords` and `metaphors`: inputs for `make_visual_prompt_pack.py`.
+- `asset_suggestions`: which assets are worth generating, such as `wechat-cover`, `podcast-cover`, `xiaohongshu-cover`, `ppt-cover`, `article-illustration`, and `infographic`.
+
+If visual fields are missing in older diagnosis files, infer them conservatively from `propagation_value`, `cognitive_gap`, and platform strategy before creating the prompt pack.
 
 ### WeChat
 

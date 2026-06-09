@@ -69,6 +69,41 @@ class ContentDiagnosisTests(unittest.TestCase):
             self.assertEqual(data["type"], "content_diagnosis")
             self.assertEqual(data["podcast_strategy"]["title"], "AI内容工具到底值多少钱")
 
+    def test_write_outputs_visual_strategy_when_present(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            markdown = Path(temp_dir) / "diagnosis.md"
+            data_json = Path(temp_dir) / "diagnosis.json"
+
+            MODULE.write_diagnosis(
+                markdown_path=markdown,
+                json_path=data_json,
+                **sample_payload(
+                    visual_strategy={
+                        "fit_score": 8,
+                        "explosive_potential": "认知反差明确，适合用封面先制造问题感。",
+                        "logic_check": "从误区到反差再到判断框架，视觉逻辑成立。",
+                        "audience_hook": "普通创作者最想知道这类工具到底值不值。",
+                        "style_keywords": ["知识卡", "商业判断"],
+                        "metaphors": ["放大镜", "交付流水线"],
+                        "avoid": ["夸张收益承诺"],
+                        "asset_suggestions": [
+                            {
+                                "asset": "wechat-cover",
+                                "fit": "高",
+                                "direction": "极简商业封面，突出价值判断",
+                            }
+                        ],
+                    }
+                ),
+            )
+
+            text = markdown.read_text(encoding="utf-8")
+            data = json.loads(data_json.read_text(encoding="utf-8"))
+            self.assertIn("## 视觉与爆款诊断", text)
+            self.assertIn("视觉适配：8/10", text)
+            self.assertEqual(data["visual_strategy"]["fit_score"], 8)
+            self.assertEqual(data["visual_strategy"]["asset_suggestions"][0]["asset"], "wechat-cover")
+
     def test_markdown_escapes_frontmatter_quotes_and_table_pipes(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             markdown = Path(temp_dir) / "diagnosis.md"

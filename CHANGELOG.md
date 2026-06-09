@@ -9,6 +9,7 @@
 ### Added
 
 - 增加内容诊断前置层，输出 `*_content_diagnosis.md` 和 `*_content_diagnosis.json`。
+- 增加平台质量闸门，输出 `*_platform_quality_guardrail.md` 和 `*_platform_quality_guardrail.json`，用于规避低创作度、洗稿、低价值 AIGC、私域诱导和公众号分发风险。
 - 增加 Xiaohongshu 科普帖生成脚本和测试。
 - 增加 NotebookLM PPT、思维导图和 artifact 流程说明。
 - 增加 PPT+播客 HyperFrames 视频流程说明和测试。

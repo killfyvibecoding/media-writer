@@ -60,6 +60,19 @@ def parse_platform(values: Iterable[str]) -> list[dict[str, str]]:
     return strategies
 
 
+def parse_visual_asset(values: Iterable[str]) -> list[dict[str, str]]:
+    assets: list[dict[str, str]] = []
+    for raw in values:
+        parts = [clean(part) for part in raw.split("::", 2)]
+        if len(parts) != 3:
+            raise ValueError('visual asset must be "asset::fit::direction"')
+        asset, fit, direction = parts
+        if not asset or not fit or not direction:
+            raise ValueError("visual asset fields cannot be empty")
+        assets.append({"asset": asset, "fit": fit, "direction": direction})
+    return assets
+
+
 def clean_list(values: Iterable[str]) -> list[str]:
     return [clean(value) for value in values if clean(value)]
 
@@ -120,6 +133,43 @@ def normalize_podcast_strategy(strategy: dict[str, object]) -> dict[str, object]
     return normalized
 
 
+def normalize_visual_strategy(strategy: dict[str, object] | None) -> dict[str, object] | None:
+    if not strategy:
+        return None
+
+    normalized: dict[str, object] = {}
+    normalized["fit_score"] = bounded_score(str(strategy.get("fit_score", 0)), "visual.fit_score")
+    for field in ["explosive_potential", "logic_check", "audience_hook"]:
+        value = clean(str(strategy.get(field, "")))
+        if not value:
+            raise ValueError(f"visual strategy field {field} cannot be empty")
+        normalized[field] = value
+
+    for field in ["style_keywords", "metaphors", "avoid"]:
+        values = strategy.get(field, [])
+        if not isinstance(values, list):
+            raise ValueError(f"visual strategy field {field} must be a list")
+        normalized[field] = clean_list(str(value) for value in values)
+
+    suggestions = strategy.get("asset_suggestions", [])
+    if not isinstance(suggestions, list):
+        raise ValueError("visual strategy asset_suggestions must be a list")
+    normalized_suggestions: list[dict[str, str]] = []
+    for item in suggestions:
+        if not isinstance(item, dict):
+            raise ValueError("visual strategy asset_suggestions entries must be objects")
+        normalized_item = {
+            "asset": clean(str(item.get("asset", ""))),
+            "fit": clean(str(item.get("fit", ""))),
+            "direction": clean(str(item.get("direction", ""))),
+        }
+        if not all(normalized_item.values()):
+            raise ValueError("visual strategy asset_suggestions fields cannot be empty")
+        normalized_suggestions.append(normalized_item)
+    normalized["asset_suggestions"] = normalized_suggestions
+    return normalized
+
+
 def render_markdown(payload: dict[str, object]) -> str:
     dimensions = payload["dimensions"]
     platforms = payload["platform_strategies"]
@@ -176,6 +226,34 @@ def render_markdown(payload: dict[str, object]) -> str:
             f"| {markdown_cell(item['platform'])} | {markdown_cell(item['fit'])} | {markdown_cell(item['angle'])} |"
         )
 
+    visual = payload.get("visual_strategy")
+    if isinstance(visual, dict):
+        lines.extend(
+            [
+                "",
+                "## 视觉与爆款诊断",
+                "",
+                f"- 视觉适配：{visual['fit_score']}/10",
+                f"- 爆款潜力：{visual['explosive_potential']}",
+                f"- 逻辑校验：{visual['logic_check']}",
+                f"- 观众钩子：{visual['audience_hook']}",
+                f"- 风格关键词：{'、'.join(visual['style_keywords']) if visual['style_keywords'] else '无'}",
+                f"- 视觉隐喻：{'、'.join(visual['metaphors']) if visual['metaphors'] else '无'}",
+                f"- 避免方向：{'、'.join(visual['avoid']) if visual['avoid'] else '无'}",
+            ]
+        )
+        suggestions = visual["asset_suggestions"]
+        assert isinstance(suggestions, list)
+        lines.extend(["", "| 图像资产 | 适配度 | 方向 |", "| --- | --- | --- |"])
+        if suggestions:
+            for item in suggestions:
+                assert isinstance(item, dict)
+                lines.append(
+                    f"| {markdown_cell(item['asset'])} | {markdown_cell(item['fit'])} | {markdown_cell(item['direction'])} |"
+                )
+        else:
+            lines.append("| 无 | 无 | 无 |")
+
     lines.extend(
         [
             "",
@@ -224,12 +302,14 @@ def write_diagnosis(
     risk_notes: list[str],
     platform_strategies: list[dict[str, str]],
     podcast_strategy: dict[str, object],
+    visual_strategy: dict[str, object] | None = None,
 ) -> None:
     content_value = bounded_score(str(content_value), "content_value")
     propagation_value = bounded_score(str(propagation_value), "propagation_value")
     dimensions = normalize_dimensions(dimensions)
     platform_strategies = normalize_platform_strategies(platform_strategies)
     podcast_strategy = normalize_podcast_strategy(podcast_strategy)
+    visual_strategy = normalize_visual_strategy(visual_strategy)
     if not dimensions:
         raise ValueError("at least one diagnostic dimension is required")
     if not platform_strategies:
@@ -253,6 +333,8 @@ def write_diagnosis(
         "platform_strategies": platform_strategies,
         "podcast_strategy": podcast_strategy,
     }
+    if visual_strategy is not None:
+        payload["visual_strategy"] = visual_strategy
     for field in ["topic", "verdict", "priority", "core_insight", "cognitive_gap", "rewrite_angle"]:
         if not payload[field]:
             raise ValueError(f"{field} cannot be empty")
@@ -288,9 +370,39 @@ def main() -> int:
     parser.add_argument("--podcast-cover-direction", required=True)
     parser.add_argument("--podcast-point", action="append", required=True)
     parser.add_argument("--podcast-skip", action="append", default=[])
+    parser.add_argument("--visual-fit-score")
+    parser.add_argument("--visual-explosive-potential", default="")
+    parser.add_argument("--visual-logic", default="")
+    parser.add_argument("--visual-hook", default="")
+    parser.add_argument("--visual-style-keyword", action="append", default=[])
+    parser.add_argument("--visual-metaphor", action="append", default=[])
+    parser.add_argument("--visual-avoid", action="append", default=[])
+    parser.add_argument("--visual-asset", action="append", default=[], help='Repeat: "asset::fit::direction"')
     parser.add_argument("--markdown", required=True)
     parser.add_argument("--json", required=True)
     args = parser.parse_args()
+
+    visual_strategy = None
+    if (
+        args.visual_fit_score is not None
+        or args.visual_explosive_potential
+        or args.visual_logic
+        or args.visual_hook
+        or args.visual_style_keyword
+        or args.visual_metaphor
+        or args.visual_avoid
+        or args.visual_asset
+    ):
+        visual_strategy = {
+            "fit_score": bounded_score(args.visual_fit_score or "0", "visual_fit_score"),
+            "explosive_potential": args.visual_explosive_potential,
+            "logic_check": args.visual_logic,
+            "audience_hook": args.visual_hook,
+            "style_keywords": clean_list(args.visual_style_keyword),
+            "metaphors": clean_list(args.visual_metaphor),
+            "avoid": clean_list(args.visual_avoid),
+            "asset_suggestions": parse_visual_asset(args.visual_asset),
+        }
 
     write_diagnosis(
         markdown_path=Path(args.markdown),
@@ -320,6 +432,7 @@ def main() -> int:
             "must_cover_points": clean_list(args.podcast_point),
             "skip_points": clean_list(args.podcast_skip),
         },
+        visual_strategy=visual_strategy,
     )
     print(args.markdown)
     print(args.json)
